@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component, Link } from 'react';
 import './App.css';
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from 'axios';
+import fileDownload from 'js-file-download';
 
 
 const dimensions = [
@@ -13,7 +14,14 @@ export default class FilesUploadComponent extends Component {
     
     constructor(props) {
         super(props);
-        this.state = {apiResponse: "", dimension: null, images: [], isError: ""};
+        this.state = {
+            apiResponse: "", 
+            dimension: null, 
+            images: [], 
+            isError: "",
+            already_uploaded_urls: JSON.parse(localStorage.getItem("urls"))
+        };
+        console.log(this.state.already_uploaded_urls)
     }
     
     onChangeValue(event) {
@@ -37,8 +45,6 @@ export default class FilesUploadComponent extends Component {
       };
 
     async onSubmit(event){
-        console.log('On submit');
-        console.log(this.state.images.length);
         if (this.state.images.length < 1) {
             this.setState({isError: "Please upload at least one file! (Supported extensions are .jpg/.jpeg and .png)"});
             console.log(this.state.isError)
@@ -69,16 +75,34 @@ export default class FilesUploadComponent extends Component {
                     url: 'http://localhost:9000/upload',
                     data: body
                 })
+                .then(res=> {
+                    console.log(res);
+                    localStorage.setItem('urls', JSON.stringify(res.data["link"]));
+                    window.location.reload();
+                })
             } catch (err) {
                 this.setState({isError: 'Error occurred: ' + err})
             }
         }
     }
 
+    handleDownload = (url, filename) => {
+        axios.get(url, {
+          responseType: 'blob',
+        })
+        .then((res) => {
+          fileDownload(res.data, filename)
+        })
+    }
+
 
     render() {
+        var links = localStorage.getItem("urls") != null ? JSON.parse(localStorage.getItem("urls")) : [];
+        console.log(links)
+        console.log(links.length)
+        
         return (
-            <div className="transform-vertical">
+            <div >
                 <div className="row">
                     <form>
                         <h1>Image resizing</h1>
@@ -103,6 +127,25 @@ export default class FilesUploadComponent extends Component {
                                 {this.state.isError}
                             </div>
                         </div> 
+
+                        <div className = "row" style={{'paddingTop': '50px'}}>
+                            {links.length > 0 && 
+                                <div>
+                                    <div>The latest uploaded images:</div>
+                                    <br/>
+                                </div>
+                            }
+                            <div>
+                                {links.map( 
+                                    link => {
+                                       return <div key={link.index} style={{'paddingBottom': '10px'}}>
+                                           <button download onClick={this.handleDownload(link.address, link.name)} className="btn btn-dark">{link.name}</button>
+                                        </div>
+                                       
+                                    }
+                                )}
+                            </div>
+                        </div>
 
                     </form>
                 </div>

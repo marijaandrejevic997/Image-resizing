@@ -29,9 +29,9 @@ async function upload (imageName, base64Image, type, size){
             ContentType: type
         };
     
-        console.log(params);
         data = await promiseUpload(params);
-
+        console.log(data);
+        
         //adding task to SQS
         const paramsSQS = {
             DelaySeconds: 10,
@@ -47,18 +47,16 @@ async function upload (imageName, base64Image, type, size){
             }),
             QueueUrl: process.env.QUEUE_URL
         }
+        
 
         let queueRes = await sqs.sendMessage(paramsSQS).promise();
         console.log(queueRes)
-        const response = {
-            statusCode: 200,
-            body: queueRes
-        }
     } catch(err) {
         console.error(err);
         return "";
     }
-    return data.Location;
+    console.log(data);
+    return data;
 }
 
 
@@ -78,16 +76,23 @@ router.post('/', async function(req, res, next) {
     console.log("Uploading " + req.body.arrayImg.length + " images....")
     var array = req.body.arrayImg;
     var response;
+    var urls = [];
     for (const image of array) {
         try{
             response = await upload(image.name, image.image, image.type, image.size);
+            //add location in the URL's array
+            let url = {
+                name: response.key,
+                address: response.Location
+            }
+            urls.push(url);
         } catch (err) {
             console.error(`Error uploading image: ${err.message}`);
             res.send(err);
         }
     }
     
-    res.send({link: response});
+    res.send({link: urls});
 });
 
 module.exports = router;
