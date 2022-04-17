@@ -1,25 +1,26 @@
 var express = require('express');
 var router = express.Router();
 const AWS = require('aws-sdk');
+const dotenv = require('dotenv');
+dotenv.config();
 AWS.config.update({region: 'us-east-1'})
 const BUCKET_NAME = 'im-homework'
 const s3 = new AWS.S3({
-    accessKeyId: 'AKIA3UJVVYF5U67Q7AHL',
-    secretAccessKey: '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',
-    region: 'us-east-1'
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    region: process.env.REGION
 })
 
 const sqs = new AWS.SQS({
     apiVersion: '2012-11-05',
-    accessKeyId: 'AKIA3UJVVYF5U67Q7AHL',
-    secretAccessKey: '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',
-    region: 'us-east-1'
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    region: process.env.REGION
 })
 
 async function upload (imageName, base64Image, type, size){
     let data;
     try{
-
         //uploading image to S3 bucket
         const params = {
             Bucket: `${BUCKET_NAME}`,
@@ -44,7 +45,7 @@ async function upload (imageName, base64Image, type, size){
                 "image_path": data.Location,
                 "image_size": JSON.stringify(size)
             }),
-            QueueUrl: "https://sqs.us-east-1.amazonaws.com/799513362811/im-homework"
+            QueueUrl: process.env.QUEUE_URL
         }
 
         let queueRes = await sqs.sendMessage(paramsSQS).promise();
