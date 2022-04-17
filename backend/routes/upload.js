@@ -43,7 +43,8 @@ async function upload (imageName, base64Image, type, size){
             },
             MessageBody: JSON.stringify({
                 "image_path": data.Location,
-                "image_size": JSON.stringify(size)
+                "image_size": JSON.stringify(size),
+                "image_name": imageName
             }),
             QueueUrl: process.env.QUEUE_URL
         }
