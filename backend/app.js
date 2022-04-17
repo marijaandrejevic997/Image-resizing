@@ -3,11 +3,17 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var cors = require('cors');
 
 var indexRouter = require('./routes/index');
 var uploadRouter = require('./routes/upload');
 
 var app = express();
+app.use(cors());
+
+//to resolve error error-request-entity-too-large
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,7 +30,7 @@ app.use('/upload', uploadRouter);
 
 
 // catch 404 and forward to error handler
-/*app.use(function(req, res, next) {
+app.use(function(req, res, next) {
   next(createError(404));
 });
 
@@ -38,7 +44,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-*/
+
 
 
 module.exports = app;
