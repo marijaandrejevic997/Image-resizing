@@ -23,14 +23,11 @@ export default class FilesUploadComponent extends Component {
     }
 
     onChangeValue(event) {
-        console.log(event.target.value);
         this.state.dimension = dimensions[event.target.value];
-        console.log(this.state.dimension);
     }
 
     imgChange(event) {
         this.state.images = event.target.files;
-        console.log(this.state.images);
     }
 
     convertToBase64 (file)  {
@@ -56,8 +53,6 @@ export default class FilesUploadComponent extends Component {
         
         var arrayImg = [];
         for (const key of Object.keys(images)) {
-            console.log(images[key])
-            console.log(this.convertToBase64(images[key]))
             var value = await this.convertToBase64(images[key])
             const image = {
                 image: value,
@@ -70,7 +65,6 @@ export default class FilesUploadComponent extends Component {
                 arrayImg.push(image);
             }
         }
-        console.log(arrayImg)
         const body = {
             "arrayImg": arrayImg
         }

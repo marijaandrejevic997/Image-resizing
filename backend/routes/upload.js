@@ -4,16 +4,16 @@ const AWS = require('aws-sdk');
 AWS.config.update({region: 'us-east-1'})
 const BUCKET_NAME = 'im-homework'
 const s3 = new AWS.S3({
-    accessKeyId: '',
-    secretAccessKey: '',
-    region: ''
+    accessKeyId: 'AKIA3UJVVYF5U67Q7AHL',
+    secretAccessKey: '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',
+    region: 'us-east-1'
 })
 
 const sqs = new AWS.SQS({
-    apiVersion: '',
-    accessKeyId: '',
-    secretAccessKey: '',
-    region: ''
+    apiVersion: '2012-11-05',
+    accessKeyId: 'AKIA3UJVVYF5U67Q7AHL',
+    secretAccessKey: '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',
+    region: 'us-east-1'
 })
 
 async function upload (imageName, base64Image, type, size){
@@ -30,7 +30,6 @@ async function upload (imageName, base64Image, type, size){
     
         console.log(params);
         data = await promiseUpload(params);
-        console.log(data);
 
         //adding task to SQS
         const paramsSQS = {
@@ -45,7 +44,7 @@ async function upload (imageName, base64Image, type, size){
                 "image_path": data.Location,
                 "image_size": JSON.stringify(size)
             }),
-            QueueUrl: ""
+            QueueUrl: "https://sqs.us-east-1.amazonaws.com/799513362811/im-homework"
         }
 
         let queueRes = await sqs.sendMessage(paramsSQS).promise();
