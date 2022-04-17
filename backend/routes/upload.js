@@ -26,32 +26,14 @@ async function upload (imageName, base64Image, type, size){
             Bucket: `${BUCKET_NAME}`,
             Key: imageName,
             Body: new Buffer.from(base64Image.replace(/^data:image\/\w+;base64,/, ""), 'base64'),
-            ContentType: type
+            ContentType: type,
+            Tagging: "public=true"
         };
     
         data = await promiseUpload(params);
         console.log(data);
         
-        //adding task to SQS
-        const paramsSQS = {
-            DelaySeconds: 10,
-            MessageAttributes: {
-                "Title": {
-                    DataType: "String",
-                    StringValue: imageName
-                }
-            },
-            MessageBody: JSON.stringify({
-                "image_path": data.Location,
-                "image_size": JSON.stringify(size),
-                "image_name": imageName
-            }),
-            QueueUrl: process.env.QUEUE_URL
-        }
         
-
-        let queueRes = await sqs.sendMessage(paramsSQS).promise();
-        console.log(queueRes)
     } catch(err) {
         console.error(err);
         return "";
@@ -78,8 +60,12 @@ router.post('/', async function(req, res, next) {
     var array = req.body.arrayImg;
     var response;
     var urls = [];
+    var sizes = [];
+    var names = [];
     for (const image of array) {
         try{
+            sizes.push(image.size)
+            names.push(image.name)
             response = await upload(image.name, image.image, image.type, image.size);
             //add location in the URL's array
             let url = {
@@ -92,7 +78,26 @@ router.post('/', async function(req, res, next) {
             res.send(err);
         }
     }
-    
+    //adding task to SQS
+    const paramsSQS = {
+        DelaySeconds: 10,
+        MessageAttributes: {
+            "Title": {
+                DataType: "String",
+                StringValue: "Resize task"
+            }
+        },
+        MessageBody: JSON.stringify({
+            "image_path": JSON.stringify(urls),
+            "image_size": JSON.stringify(sizes),
+            "image_name": JSON.stringify(names)
+        }),
+        QueueUrl: process.env.QUEUE_URL
+    }
+
+
+    let queueRes = await sqs.sendMessage(paramsSQS).promise();
+    console.log(queueRes)
     res.send({link: urls});
 });
 
