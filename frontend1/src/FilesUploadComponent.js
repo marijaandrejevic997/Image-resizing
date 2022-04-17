@@ -86,7 +86,9 @@ export default class FilesUploadComponent extends Component {
         }
     }
 
-    handleDownload = (url, filename) => {
+    handleDownload = (event, url, filename) => {
+        //to disable click on browser's refresh event
+        event.preventDefault();
         axios.get(url, {
           responseType: 'blob',
         })
@@ -102,7 +104,7 @@ export default class FilesUploadComponent extends Component {
         console.log(links.length)
         
         return (
-            <div >
+            <div>
                 <div className="row">
                     <form>
                         <h1>Image resizing</h1>
@@ -139,7 +141,7 @@ export default class FilesUploadComponent extends Component {
                                 {links.map( 
                                     link => {
                                        return <div key={link.index} style={{'paddingBottom': '10px'}}>
-                                           <button download onClick={this.handleDownload(link.address, link.name)} className="btn btn-dark">{link.name}</button>
+                                           <button download onClick={e=> this.handleDownload(e, link.address, link.name)} className="btn btn-dark">{link.name}</button>
                                         </div>
                                        
                                     }
