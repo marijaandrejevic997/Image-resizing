@@ -3,4 +3,6 @@ Frontend part is React project. For implementation, there are used: Bootstrap (f
 
 Backend part is Node JS project using Express. Node JS project starts using command npm start. The routes are served on http://localhost:9000/.
 
+Worker project is used to receive the messages (tasks) from SQS. There, the long polling is used. It starts using comman npm start.
+
 Credentials for the AWS, which are used for S3 Bucket and SQS, are stored in .env hidden file and there are not pushed to the git repository. (only .env file is pushed with empty variables)
